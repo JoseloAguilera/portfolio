@@ -99,16 +99,27 @@ if (contactForm) {
     }
 
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch("https://formsubmit.co/ajax/joseaguilera1709@gmail.com", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: payload.nombre,
+          email: payload.email,
+          message: payload.mensaje,
+          _subject: `Nuevo contacto desde joseaguilera.live - ${payload.nombre}`,
+          _template: "table",
+          _captcha: "false",
+          _replyto: payload.email,
+        }),
       });
 
       const data = await response.json().catch(() => ({}));
 
-      if (!response.ok) {
-        throw new Error(data.error || "No se pudo enviar el mensaje.");
+      if (!response.ok || data.success === "false") {
+        throw new Error(data.message || data.error || "No se pudo enviar el mensaje.");
       }
 
       contactForm.reset();
