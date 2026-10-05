@@ -20,11 +20,12 @@ export default async function handler(request, response) {
   }
 
   const recipient = process.env.CONTACT_TO || DEFAULT_TO;
-  const formSubmitResponse = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(recipient)}`, {
+  const formSubmitResponse = await fetch(`https://formsubmit.co/ajax/${recipient}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      Referer: "https://joseaguilera.live/",
     },
     body: JSON.stringify({
       name: cleanNombre,
@@ -38,10 +39,22 @@ export default async function handler(request, response) {
   });
 
   const resultText = await formSubmitResponse.text();
+  let result = {};
+
+  try {
+    result = JSON.parse(resultText);
+  } catch {
+    result = {};
+  }
 
   if (!formSubmitResponse.ok) {
     console.error("FormSubmit error", formSubmitResponse.status, resultText);
     return response.status(502).json({ error: "No se pudo enviar el mensaje. Probá por WhatsApp o email directo." });
+  }
+
+  if (result.success === "false") {
+    console.error("FormSubmit rejected", result.message || resultText);
+    return response.status(409).json({ error: "El formulario está pendiente de activación. Probá por WhatsApp o email directo." });
   }
 
   return response.status(200).json({ ok: true });
