@@ -5,6 +5,7 @@ const revealItems = document.querySelectorAll(".reveal");
 const projectGrid = document.querySelector(".project-grid");
 const prevProject = document.querySelector("[data-carousel-prev]");
 const nextProject = document.querySelector("[data-carousel-next]");
+const contactForm = document.querySelector("#contact-form");
 
 if (year) {
   year.textContent = new Date().getFullYear();
@@ -71,6 +72,23 @@ if ("IntersectionObserver" in window) {
   revealItems.forEach((item) => observer.observe(item));
 } else {
   revealItems.forEach((item) => item.classList.add("is-visible"));
+}
+
+if (contactForm) {
+  contactForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(contactForm);
+    const nombre = String(formData.get("nombre") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const mensaje = String(formData.get("mensaje") || "").trim();
+    const subject = encodeURIComponent(`Contacto desde joseaguilera.live - ${nombre || "Consulta"}`);
+    const body = encodeURIComponent(
+      [`Nombre: ${nombre}`, `Email: ${email}`, "", mensaje].join("\n")
+    );
+
+    window.location.href = `mailto:joseaguilera1709@gmail.com?subject=${subject}&body=${body}`;
+  });
 }
 
 if (projectGrid && prevProject && nextProject) {
