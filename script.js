@@ -75,19 +75,59 @@ if ("IntersectionObserver" in window) {
 }
 
 if (contactForm) {
-  contactForm.addEventListener("submit", (event) => {
+  const statusMessage = contactForm.querySelector(".form-status");
+  const submitButton = contactForm.querySelector('button[type="submit"]');
+
+  contactForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const formData = new FormData(contactForm);
-    const nombre = String(formData.get("nombre") || "").trim();
-    const email = String(formData.get("email") || "").trim();
-    const mensaje = String(formData.get("mensaje") || "").trim();
-    const subject = encodeURIComponent(`Contacto desde joseaguilera.live - ${nombre || "Consulta"}`);
-    const body = encodeURIComponent(
-      [`Nombre: ${nombre}`, `Email: ${email}`, "", mensaje].join("\n")
-    );
+    const payload = {
+      nombre: String(formData.get("nombre") || "").trim(),
+      email: String(formData.get("email") || "").trim(),
+      mensaje: String(formData.get("mensaje") || "").trim(),
+    };
 
-    window.location.href = `mailto:joseaguilera1709@gmail.com?subject=${subject}&body=${body}`;
+    if (statusMessage) {
+      statusMessage.textContent = "Enviando mensaje...";
+      statusMessage.classList.remove("is-error", "is-success");
+    }
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Enviando...";
+    }
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || "No se pudo enviar el mensaje.");
+      }
+
+      contactForm.reset();
+
+      if (statusMessage) {
+        statusMessage.textContent = "Mensaje enviado. Te voy a responder al correo indicado.";
+        statusMessage.classList.add("is-success");
+      }
+    } catch (error) {
+      if (statusMessage) {
+        statusMessage.textContent = error.message || "No se pudo enviar. Probá por WhatsApp o email directo.";
+        statusMessage.classList.add("is-error");
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Enviar mensaje";
+      }
+    }
   });
 }
 

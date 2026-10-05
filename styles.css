@@ -736,6 +736,26 @@ p {
   color: rgba(210, 193, 191, 0.72);
 }
 
+.contact-form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.form-status {
+  min-height: 24px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.form-status.is-success {
+  color: #7ee2a8;
+}
+
+.form-status.is-error {
+  color: #ff9a90;
+}
+
 .site-footer {
   display: flex;
   align-items: center;
